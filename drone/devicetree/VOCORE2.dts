@@ -1,0 +1,99 @@
+/dts-v1/;
+
+#include "VOCORE2.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	compatible = "vocore,vocore2", "mediatek,mt7628an-soc";
+	model = "VoCore2";
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		status {
+			label = "vocore2:fuchsia:status";
+			gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
+
+&spi0 {
+	status = "okay";
+
+	m25p80@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		m25p,chunked-io = <32>;
+
+		partition@0 {
+			label = "u-boot";
+			reg = <0x0 0x30000>;
+			read-only;
+		};
+
+		partition@30000 {
+			label = "u-boot-env";
+			reg = <0x30000 0x10000>;
+			read-only;
+		};
+
+		factory: partition@40000 {
+			label = "factory";
+			reg = <0x40000 0x10000>;
+			read-only;
+		};
+
+		partition@50000 {
+			label = "firmware";
+			reg = <0x50000 0xfb0000>;
+		};
+	};
+};
+
+//INTERCEPTOR CONFIG
+&pinctrl {
+
+        pwm_pins: pwm{
+               pwm0{
+           	    ralink,group = "pwm0";
+                    ralink,function = "pwm0";
+               };
+               pwm1{
+                    ralink,group = "pwm1";
+                    ralink,function = "pwm1";
+               };
+               uart2_pwm{
+                    ralink,group = "uart2";
+	            ralink,function = "pwm";
+               };
+	};
+
+};
+&i2c{
+	status = "okay";
+	clock-frequency = <400000>;	 
+
+	adc@0 {
+		compatible = "microchip,mcp3426";
+		reg = <0x68>;
+	};
+};
+
+
+&uart2 {
+        status = "disabled";
+	//status= "okay";
+};
+
+
+&pwm {
+	pinctrl-0 = <&pwm_pins>;
+        status="okay";
+	//status="disabled";
+	
+};
+
